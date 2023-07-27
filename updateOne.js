@@ -1,3 +1,7 @@
+
+
+
+
 const {MongoClient,ObjectId} = require('mongodb')
 require('dotenv').config()
 const url = process.env.MONGO_URL
@@ -15,15 +19,15 @@ const dbconnection = async()=>{
         console.error(`find a error while connecting with the database ${error}`);
     }
 }
-const deleteOne = {account_type:"Saving" }
+const updateFilter = { _id:  ObjectId("64c2889ce89330965e131d10") }
 
-
+const documentToUpdate = {balance:{$inc:10000000}}
 const main = async()=>{
     try {
         await dbconnection()
-        const result = collectionName.deleteOne(deleteOne)
-        
-        console.log(`Found ${await result} documents`)
+        const result = collectionName.updateOne(updateFilter,documentToUpdate)
+        (await result).modifiedCount>0?console.log(`update`):console.log("not update")
+        console.log(`Found ${await docCount} documents`)
     } catch (error) {
         console.error(`error finding dicument ${error}`);
     }finally{
