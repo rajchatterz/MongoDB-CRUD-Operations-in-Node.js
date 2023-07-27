@@ -1,46 +1,31 @@
 const {MongoClient} = require('mongodb')
 require('dotenv').config()
 const url = process.env.MONGO_URL
+const safeUrl = `${url.slice(0,14)}****${url.slice(30,31)}****${url.slice(47)}`
 const client = new MongoClient(url)
 const dbname = "bank"
 const collection_name = "accounts"
-const safeURI = `${url.slice(0, 14)}****${url.slice(30, 31)}****${url.slice(47)}`
-const accountCollection = client.db(dbname).collection(collection_name)
+const collectionName = client.db(dbname).collection(collection_name)
 
-const dbconnection = async ()=>{
+const dbconnection = async()=>{
     try {
         await client.connect()
-        console.log(`connected to the ${dbname} with the url name${safeURI}`)
+        console.log(`sever is successfully connected with the ${safeUrl}`)
     } catch (error) {
-        console.error('error fetching while connecting to the database',error);
+        console.error(`find a error while connecting with the database ${error}`);
     }
 }
-const sampleAccount = [
-    {
-        account_id:"727217272",
-        account_holder:"JOsh malon",
-        account_type:"current",
-        balance:7477474,
-        last_seen:new Date()
-    },
-    {
-        account_id:"y263833",
-        account_holder:"eva melon",
-        account_type:"business",
-        balance:8377388,
-        last_seen:new Date()
-    }
-]
-
+const documentToFind = {balance:{$gt:456000}}
 const main = async()=>{
     try {
         await dbconnection()
-        let result = await accountCollection.insertMany(sampleAccount)
-        console.log(`inserted document ${result.account_id}`)
+        const result = collectionName.find(documentToFind)
+        const docCount = collectionName.countDocuments(documentToFind)
+        await result.forEach((e)=>{console.log(e)})
+        console.log(`Found ${await docCount} documents`)
     } catch (error) {
-        console.log(`error while inserting the document ${error}`)
-    }
-    finally{
+        console.error(`error finding dicument ${error}`);
+    }finally{
         await client.close()
     }
 }
